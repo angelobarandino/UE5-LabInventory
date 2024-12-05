@@ -4,20 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "LabInventoryGridWidget.h"
+#include "Blueprint/DragDropOperation.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "Blueprint/UserWidget.h"
 #include "LabInventorySlotWidget.generated.h"
 
+class ULabItemDraggedPreviewWidget;
 class ULabInventoryItem;
 class ULabInventorySlotEntry;
+
+UCLASS()
+class LABINVENTORY_API ULabDragDropOps : public UDragDropOperation
+{
+	GENERATED_BODY()
+
+public:
+	TWeakObjectPtr<ULabInventorySlotEntry> ItemSlotData;
+	
+};
 
 UCLASS()
 class LABINVENTORY_API ULabInventorySlotWidget : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()
 
+public:
+	bool HasValidItem() const;
+	
+	int32 GetSlotIndex() const { return InventorySlotEntry->SlotIndex; }
+	
 protected:
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<ULabItemDraggedPreviewWidget> ItemDragPreviewWidgetClass;
+	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<ULabInventorySlotEntry> InventorySlotEntry;
 
@@ -26,21 +45,31 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemCount = 0;
-
+	
+	virtual void NativeOnInitialized() override;
+	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateDisplay();
-
+	
 	// ~Start IUserObjectListEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeOnEntryReleased() override;
 	// ~End IUserObjectListEntry
 
-	virtual void NativeOnInitialized() override;
+	// ~Start UUserWidget
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	// ~End UUserWidget
 	
-public:
+
+private:
+	mutable TWeakObjectPtr<UUserWidget> CachedPreviewWidget;
 	
-	int32 GetSlotIndex() const { return InventorySlotEntry->SlotIndex; }
+	UUserWidget* CreateDragPreviewWidget() const;
 	
 	void HandleUpdateDisplay();
-
 };
