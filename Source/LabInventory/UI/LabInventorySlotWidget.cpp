@@ -4,14 +4,19 @@
 #include "LabInventorySlotWidget.h"
 
 #include "LabInventoryGridWidget.h"
+#include "LabInventory/Components/LabInventoryComponent.h"
 #include "LabInventory/Items/LabInventoryItem.h"
 
 void ULabInventorySlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	if (ListItemObject)
 	{
-		InventorySlotEntry = Cast<ULAB_InventorySlotEntry>(ListItemObject);
+		InventorySlotEntry = Cast<ULabInventorySlotEntry>(ListItemObject);
+
+		ItemCount = InventorySlotEntry->ItemCount;
+		InventoryItem = InventorySlotEntry->InventoryItem;
 		InventorySlotEntry->UpdateInventorySlotDisplay.AddUObject(this, &ThisClass::HandleUpdateDisplay);
+		
 		HandleUpdateDisplay();
 	}
 }
@@ -20,17 +25,24 @@ void ULabInventorySlotWidget::NativeOnEntryReleased()
 {
 	if (InventorySlotEntry)
 	{
-		InventorySlotEntry->ItemCount = 0;
-		InventorySlotEntry->InventoryItem = nullptr;
+		ItemCount = 0;
+		InventoryItem = nullptr;
 		InventorySlotEntry->UpdateInventorySlotDisplay.Clear();
-		UpdateDisplay(0, nullptr);
+		UpdateDisplay();
 	}
+}
+
+void ULabInventorySlotWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
 }
 
 void ULabInventorySlotWidget::HandleUpdateDisplay()
 {
 	if (InventorySlotEntry && InventorySlotEntry->InventoryItem != nullptr)
 	{
-		UpdateDisplay(InventorySlotEntry->ItemCount, InventorySlotEntry->InventoryItem);
+		ItemCount = InventorySlotEntry->ItemCount;
+		InventoryItem = InventorySlotEntry->InventoryItem;
+		UpdateDisplay();
 	}
 }

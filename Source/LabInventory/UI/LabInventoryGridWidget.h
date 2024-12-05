@@ -14,7 +14,7 @@ class ULabInventoryComponent;
 DECLARE_MULTICAST_DELEGATE(FLoadInventorySlotItem);
 
 UCLASS(BlueprintType)
-class ULAB_InventorySlotEntry : public UObject
+class ULabInventorySlotEntry : public UObject
 {
 	GENERATED_BODY()
 
@@ -28,6 +28,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemCount = 0;
 
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<ULabInventoryComponent> Inventory;
+	
 	FLoadInventorySlotItem UpdateInventorySlotDisplay;
 };
 

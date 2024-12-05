@@ -43,8 +43,9 @@ void ULabInventoryGridWidget::CreateInventorySlots() const
 
 	for (int32 SlotIndex = 0; SlotIndex < OwnerInventory->ItemsSize; SlotIndex++)
 	{
-		ULAB_InventorySlotEntry* Entry = NewObject<ULAB_InventorySlotEntry>();
+		ULabInventorySlotEntry* Entry = NewObject<ULabInventorySlotEntry>();
 		Entry->SlotIndex = SlotIndex;
+		Entry->Inventory = OwnerInventory;
 
 		FLabInventoryItemInstance ItemInstance;
 		if (OwnerInventory->TryGetInventoryItemAtSlot(SlotIndex, ItemInstance))
@@ -78,7 +79,7 @@ void ULabInventoryGridWidget::OnInventoryUpdated(const FLabInventoryItemInstance
 	if (Instance.InventoryItem.IsValid())
 	{
 		UObject* SlotEntry = InventorySlots->GetItemAt(Instance.SlotIndex);
-		if (ULAB_InventorySlotEntry* ItemEntry = Cast<ULAB_InventorySlotEntry>(SlotEntry))
+		if (ULabInventorySlotEntry* ItemEntry = Cast<ULabInventorySlotEntry>(SlotEntry))
 		{
 			ItemEntry->ItemCount = Instance.ItemCount;
 			ItemEntry->InventoryItem = Instance.InventoryItem.Get();

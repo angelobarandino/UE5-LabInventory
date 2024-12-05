@@ -9,7 +9,7 @@
 #include "LabInventorySlotWidget.generated.h"
 
 class ULabInventoryItem;
-class ULAB_InventorySlotEntry;
+class ULabInventorySlotEntry;
 
 UCLASS()
 class LABINVENTORY_API ULabInventorySlotWidget : public UUserWidget, public IUserObjectListEntry
@@ -19,15 +19,23 @@ class LABINVENTORY_API ULabInventorySlotWidget : public UUserWidget, public IUse
 protected:
 
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<ULAB_InventorySlotEntry> InventorySlotEntry;
+	TObjectPtr<ULabInventorySlotEntry> InventorySlotEntry;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<const ULabInventoryItem> InventoryItem = nullptr;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 ItemCount = 0;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void UpdateDisplay(const int32 ItemCount, const ULabInventoryItem* InventoryItem);
+	void UpdateDisplay();
 
 	// ~Start IUserObjectListEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeOnEntryReleased() override;
 	// ~End IUserObjectListEntry
+
+	virtual void NativeOnInitialized() override;
 	
 public:
 	
