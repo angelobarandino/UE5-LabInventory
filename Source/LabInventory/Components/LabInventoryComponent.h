@@ -11,7 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemUpdatedDelegate, const FLabInventoryItemInstance&, Instance);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemRemovedDelegate, const int32, RemovedSlotIndex);
 
-UCLASS(meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=Custom, meta=(BlueprintSpawnableComponent))
 class LABINVENTORY_API ULabInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()

@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LabInventoryGridWidget.h"
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "Blueprint/UserWidget.h"
 #include "LabInventorySlotWidget.generated.h"
 
+class ILabInventoryManagerInterface;
+class ULabInventoryItemTooltip;
 class ULabItemDraggedPreviewWidget;
 class ULabInventoryItem;
 class ULabInventorySlotEntry;
@@ -33,7 +34,7 @@ public:
 	bool HasValidItem() const;
 	
 	UFUNCTION(BlueprintCallable)
-	int32 GetSlotIndex() const { return SlotItemData->SlotIndex; }
+	int32 GetSlotIndex() const;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -49,7 +50,7 @@ protected:
 	int32 ItemCount = 0;
 	
 	virtual void NativeOnInitialized() override;
-	
+
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateDisplay();
 	
@@ -73,9 +74,13 @@ protected:
 	// ~End UUserWidget
 
 private:
-	mutable TWeakObjectPtr<UUserWidget> CachedPreviewWidget;
+	ILabInventoryManagerInterface* InventoryManager;
 	
-	UUserWidget* CreateDragPreviewWidget() const;
+	TWeakObjectPtr<ULabInventoryItemTooltip> CachedTooltipWidget;
+	
+	UUserWidget* CreateDragPreviewWidget();
 	
 	void HandleUpdateDisplay();
+	
+	void InitTooltipWidget();
 };

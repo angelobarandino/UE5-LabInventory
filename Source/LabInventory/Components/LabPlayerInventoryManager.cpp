@@ -4,7 +4,9 @@
 #include "LabPlayerInventoryManager.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "LabInventory/LabInventory.h"
 #include "LabInventory/UI/LabInventoryScreenWidget.h"
+#include "LabInventory/UI/LabItemDraggedPreviewWidget.h"
 
 
 ULabPlayerInventoryManager::ULabPlayerInventoryManager(const FObjectInitializer& ObjectInitializer)
@@ -61,4 +63,26 @@ void ULabPlayerInventoryManager::ToggleInventory()
 			PlayerController->bShowMouseCursor = true;
 		}
 	}
+}
+
+UUserWidget* ULabPlayerInventoryManager::GetOrCreateItemPreview(const UObject* Outer, const TSubclassOf<UUserWidget>& PreviewWidgetClass)
+{
+	if (CachedPreviewWidget.IsValid())
+	{
+		return CachedPreviewWidget.Get();
+	}
+
+	if (!PreviewWidgetClass)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("PreviewWidgetClass is null."));
+		return nullptr;
+	}
+	
+	UUserWidget* PreviewWidget = CreateWidget(PlayerController, PreviewWidgetClass);
+	if (PreviewWidget)
+	{
+		CachedPreviewWidget = PreviewWidget;
+	}
+
+	return PreviewWidget;
 }

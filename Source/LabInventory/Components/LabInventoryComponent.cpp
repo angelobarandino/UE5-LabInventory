@@ -251,7 +251,7 @@ void ULabInventoryComponent::RetrieveItemStackingInfo(const ULabInventoryItem* I
 	bOutStackable = false;
 	
 	// Attempt to find the item definition fragment
-	if (const ULAB_InventoryFragment* InventoryFragment = ULabInventoryStatics::FindItemDefinitionFragment<ULAB_InventoryFragment>(InventoryItem))
+	if (const ULabInventoryFragment* InventoryFragment = ULabInventoryStatics::FindItemDefinitionFragment<ULabInventoryFragment>(InventoryItem))
 	{
         // Update stack size and stackability if a fragment is found
 		OutStackSize = InventoryFragment->StackSize;

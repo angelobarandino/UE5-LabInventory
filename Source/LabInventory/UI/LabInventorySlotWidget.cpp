@@ -4,12 +4,17 @@
 #include "LabInventorySlotWidget.h"
 
 #include "LabInventoryGridWidget.h"
+#include "LabInventoryItemTooltip.h"
 #include "LabItemDraggedPreviewWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "LabInventory/LabInventory.h"
 #include "LabInventory/Components/LabInventoryComponent.h"
+#include "LabInventory/Components/LabPlayerInventoryManager.h"
 #include "LabInventory/Core/LabUpdateInventoryParam.h"
+#include "LabInventory/Interfaces/LabInventoryManagerInterface.h"
 #include "LabInventory/Interfaces/LabPlayerInventoryInterface.h"
+#include "LabInventory/Items/LabItemFragment.h"
+#include "LabInventory/Library/LabInventoryStatics.h"
 
 
 bool ULabInventorySlotWidget::HasValidItem() const
@@ -17,9 +22,19 @@ bool ULabInventorySlotWidget::HasValidItem() const
 	return InventoryItem != nullptr && ItemCount > 0;
 }
 
+int32 ULabInventorySlotWidget::GetSlotIndex() const
+{
+	return SlotItemData->SlotIndex;
+}
+
 void ULabInventorySlotWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	if (const APlayerController* PlayerController = GetOwningPlayer())
+	{
+		InventoryManager = PlayerController->FindComponentByClass<ULabPlayerInventoryManager>();
+	}
 }
 
 void ULabInventorySlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
@@ -31,7 +46,8 @@ void ULabInventorySlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 		ItemCount = SlotItemData->ItemCount;
 		InventoryItem = SlotItemData->InventoryItem;
 		SlotItemData->UpdateInventorySlotDisplay.AddUObject(this, &ThisClass::HandleUpdateDisplay);
-		
+
+		InitTooltipWidget();
 		HandleUpdateDisplay();
 	}
 }
@@ -119,7 +135,7 @@ bool ULabInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FD
 			if (APlayerController* PlayerController = GetOwningPlayer())
 			{
 				const bool bCanMove = SlotItemData->Inventory->CanMoveItemToSlot(SlotItemData->SlotIndex, DragSlotData->InventoryItem);
-				if (!bCanMove)
+				if (!bCanMove || (DragSlotData->Inventory.Get() == SlotItemData->Inventory.Get() && DragSlotData->SlotIndex == SlotItemData->SlotIndex))
 				{
 					Operation->DraggedWidget->OnDragEnded(true);
 					return true;
@@ -154,26 +170,20 @@ bool ULabInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FD
 	return true;
 }
 
-UUserWidget* ULabInventorySlotWidget::CreateDragPreviewWidget() const
+UUserWidget* ULabInventorySlotWidget::CreateDragPreviewWidget()
 {
 	if (!ItemDragPreviewWidgetClass)
 	{
 		UE_LOG(LogInventory, Warning, TEXT("ItemDragPreviewWidgetClass is null."));
 		return nullptr;
 	}
+
+	if (InventoryManager)
+	{
+		return InventoryManager->GetOrCreateItemPreview(this, ItemDragPreviewWidgetClass);
+	}
 	
-	if (CachedPreviewWidget.IsValid())
-	{
-		return CachedPreviewWidget.Get();
-	}
-
-	UUserWidget* PreviewWidget = UWidgetBlueprintLibrary::Create(GetWorld(), ItemDragPreviewWidgetClass, GetOwningPlayer());
-	if (PreviewWidget)
-	{
-		CachedPreviewWidget = PreviewWidget;
-	}
-
-	return PreviewWidget;
+	return CreateWidget<UUserWidget>(this, ItemDragPreviewWidgetClass);
 }
 
 void ULabInventorySlotWidget::HandleUpdateDisplay()
@@ -182,6 +192,42 @@ void ULabInventorySlotWidget::HandleUpdateDisplay()
 	{
 		ItemCount = SlotItemData->ItemCount;
 		InventoryItem = SlotItemData->InventoryItem;
+
+		InitTooltipWidget();
 		UpdateDisplay();
+	}
+}
+
+void ULabInventorySlotWidget::InitTooltipWidget()
+{
+	if (InventoryItem)
+	{
+		const ULabInventoryFragment* InventoryFragment = ULabInventoryStatics::FindItemDefinitionFragment<ULabInventoryFragment>(InventoryItem);
+		
+		if (!CachedTooltipWidget.IsValid())
+		{
+			if (InventoryFragment->TooltipWidgetClass)
+			{
+				CachedTooltipWidget = CreateWidget<ULabInventoryItemTooltip>(this, InventoryFragment->TooltipWidgetClass);
+			}
+			else
+			{
+				const TSubclassOf<ULabInventoryItemTooltip> ItemTooltipWidgetClass = InventoryManager->GetInventoryTooltipClass();
+				if (ItemTooltipWidgetClass)
+				{
+					CachedTooltipWidget = CreateWidget<ULabInventoryItemTooltip>(this, ItemTooltipWidgetClass);
+				}
+			}
+		}
+
+		if (CachedTooltipWidget.IsValid())
+		{
+			CachedTooltipWidget->InitTooltip(ItemCount, InventoryItem);
+			SetToolTip(CachedTooltipWidget.Get());
+		}
+	}
+	else
+	{
+		SetToolTip(nullptr);
 	}
 }
