@@ -14,14 +14,14 @@ class ULabInventoryItem;
 class ULabInventorySlotEntry;
 
 UCLASS()
-class LABINVENTORY_API ULabDragDropOps : public UDragDropOperation
+class LABINVENTORY_API ULabDragDropOperation : public UDragDropOperation
 {
 	GENERATED_BODY()
 
 public:
-	TWeakObjectPtr<ULabInventorySlotEntry> DraggedSlotItemData;
-	
+	TObjectPtr<class ULabInventorySlotWidget> DraggedWidget;
 };
+
 
 UCLASS()
 class LABINVENTORY_API ULabInventorySlotWidget : public UUserWidget, public IUserObjectListEntry
@@ -29,8 +29,10 @@ class LABINVENTORY_API ULabInventorySlotWidget : public UUserWidget, public IUse
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
 	bool HasValidItem() const;
 	
+	UFUNCTION(BlueprintCallable)
 	int32 GetSlotIndex() const { return SlotItemData->SlotIndex; }
 	
 protected:
@@ -51,16 +53,21 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateDisplay();
 	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnDragStarted();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnDragEnded(const bool bIsCanceled);
+
 	// ~Start IUserObjectListEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeOnEntryReleased() override;
 	// ~End IUserObjectListEntry
 
 	// ~Start UUserWidget
-	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	// ~End UUserWidget

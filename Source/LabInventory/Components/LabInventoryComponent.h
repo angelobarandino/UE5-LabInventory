@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "LabInventory/Core/LabUpdateInventoryParam.h"
 #include "LabInventory/Core/LabInventoryData.h"
+#include "LabInventory/Core/LabUpdateInventoryParam.h"
 #include "LabInventoryComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemUpdatedDelegate, const FLabInventoryItemInstance&, Instance);
@@ -40,6 +40,9 @@ public:
 
 	UFUNCTION()
 	FLabUpdateInventoryParam CreateMoveToSlotForItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem);
+
+	UFUNCTION()
+	bool CanMoveItemToSlot(const int32 SlotIndex, const ULabInventoryItem* InventoryItem);
 	
 	UFUNCTION()
 	bool AddInventoryItem(const FLabUpdateInventoryParam& Params);

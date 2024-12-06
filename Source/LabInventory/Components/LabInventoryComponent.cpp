@@ -148,6 +148,48 @@ FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const i
 	return UpdateParams;
 }
 
+bool ULabInventoryComponent::CanMoveItemToSlot(const int32 SlotIndex, const ULabInventoryItem* InventoryItem)
+{
+	// Ensure the InventoryItem is valid.
+	if (!InventoryItem)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("CanMoveItemToSlot: Invalid InventoryItem passed."));
+		return false;
+	}
+
+	// Retrieve stacking info for the item.
+	int32 MaxStackSize = 1;
+	bool bIsStackable = true;
+	RetrieveItemStackingInfo(InventoryItem, bIsStackable, MaxStackSize);
+
+	// Check if the slot is empty.
+	const FLabInventoryEntry* ItemEntry = InventoryList.GetItemAtSlot(SlotIndex);
+	if (!ItemEntry)
+	{
+		return true; // Slot is empty, item can be moved.
+	}
+
+	// Check if the item is compatible with the existing item in the slot.
+	if (IsItemCompatible(*ItemEntry, InventoryItem))
+	{
+		// Check stacking logic if applicable.
+		if (bIsStackable && ItemEntry->Instance.ItemCount < MaxStackSize)
+		{
+			// Slot can accommodate more of this item.
+			return true;
+		}
+
+		UE_LOG(LogInventory, Warning, TEXT("CanMoveItemToSlot: Slot %d cannot accommodate more of this item (stack full)."), SlotIndex);
+	}
+	else
+	{
+		UE_LOG(LogInventory, Warning, TEXT("CanMoveItemToSlot: Slot %d contains an incompatible item."), SlotIndex);
+	}
+	
+	// Slot is occupied and incompatible, or stack is full.
+	return false; 
+}
+
 bool ULabInventoryComponent::AddInventoryItem(const FLabUpdateInventoryParam& Params)
 {
 	const AActor* Owner = GetOwner();

@@ -6,8 +6,8 @@
 #include "LabInventoryGridWidget.h"
 #include "LabItemDraggedPreviewWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Kismet/GameplayStatics.h"
 #include "LabInventory/LabInventory.h"
+#include "LabInventory/Components/LabInventoryComponent.h"
 #include "LabInventory/Core/LabUpdateInventoryParam.h"
 #include "LabInventory/Interfaces/LabPlayerInventoryInterface.h"
 
@@ -47,16 +47,6 @@ void ULabInventorySlotWidget::NativeOnEntryReleased()
 	}
 }
 
-void ULabInventorySlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
-}
-
-void ULabInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnMouseLeave(InMouseEvent);
-}
-
 FReply ULabInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	if (HasValidItem())
@@ -79,6 +69,13 @@ FReply ULabInventorySlotWidget::NativeOnPreviewMouseButtonDown(const FGeometry& 
 	return FReply::Unhandled();
 }
 
+void ULabInventorySlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
+
+	OnDragEnded(true);
+}
+
 void ULabInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
@@ -97,40 +94,64 @@ void ULabInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, 
 			ItemPreviewWidget->InitializePreview(SlotItemData.Get());
 		}
 		
-		ULabDragDropOps* Operation = Cast<ULabDragDropOps>(UWidgetBlueprintLibrary::CreateDragDropOperation(ULabDragDropOps::StaticClass()));
+		ULabDragDropOperation* Operation = Cast<ULabDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(ULabDragDropOperation::StaticClass()));
 		if (Operation)
 		{
 			Operation->DefaultDragVisual = PreviewWidget;
-			Operation->DraggedSlotItemData = SlotItemData;
-			OutOperation = Operation;				
+			Operation->Payload = SlotItemData.Get();
+			Operation->Pivot = EDragPivot::TopLeft;
+			Operation->DraggedWidget = this;
+			OutOperation = Operation;
+
+			OnDragStarted();
 		}
 	}
 }
 
 bool ULabInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	const ULabDragDropOps* Operation = Cast<ULabDragDropOps>(InOperation);
-	if (Operation && Operation->DraggedSlotItemData.IsValid())
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	
+	if (const ULabDragDropOperation* Operation = Cast<ULabDragDropOperation>(InOperation))
 	{
-		if (APlayerController* PlayerController = GetOwningPlayer())
+		if (const ULabInventorySlotEntry* DragSlotData = Cast<ULabInventorySlotEntry>(Operation->Payload))
 		{
-			if (PlayerController->Implements<ULabPlayerInventoryInterface>())
+			if (APlayerController* PlayerController = GetOwningPlayer())
 			{
-				FLabMoveInventoryItemParam MoveItemParam;
-				MoveItemParam.SourceInventory = Operation->DraggedSlotItemData->Inventory;
-				MoveItemParam.SourceSlotIndex = Operation->DraggedSlotItemData->SlotIndex;
-				MoveItemParam.TargetInventory = SlotItemData->Inventory;
-				MoveItemParam.TargetSlotIndex = SlotItemData->SlotIndex;
-				ILabPlayerInventoryInterface::Execute_MoveInventoryItem(PlayerController, MoveItemParam);
+				const bool bCanMove = SlotItemData->Inventory->CanMoveItemToSlot(SlotItemData->SlotIndex, DragSlotData->InventoryItem);
+				if (!bCanMove)
+				{
+					Operation->DraggedWidget->OnDragEnded(true);
+					return true;
+				}
+				
+				if (PlayerController->Implements<ULabPlayerInventoryInterface>())
+				{
+					FLabMoveInventoryItemParam MoveItemParam;
+					MoveItemParam.SourceInventory = DragSlotData->Inventory;
+					MoveItemParam.SourceSlotIndex = DragSlotData->SlotIndex;
+					MoveItemParam.TargetInventory = SlotItemData->Inventory;
+					MoveItemParam.TargetSlotIndex = SlotItemData->SlotIndex;
+					ILabPlayerInventoryInterface::Execute_MoveInventoryItem(PlayerController, MoveItemParam);
+
+					if (Operation->DraggedWidget)
+					{
+						Operation->DraggedWidget->OnDragEnded(false);
+					}
+		
+					return true;
+				}
 			}
-			else
-			{
-				UE_LOG(LogInventory, Warning, TEXT("PlayerController does not implement ULabPlayerInventoryInterface"));
-			}
+
+			UE_LOG(LogInventory, Warning, TEXT("PlayerController is missing or does not implement ULabPlayerInventoryInterface"));
+		}
+		else
+		{
+			UE_LOG(LogInventory, Warning, TEXT("Dropped item contains missing or invalid payload."));
 		}
 	}
 
-	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	return true;
 }
 
 UUserWidget* ULabInventorySlotWidget::CreateDragPreviewWidget() const
