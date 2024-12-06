@@ -6,7 +6,10 @@
 
 void FLabInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
 {
-	
+	for (const int32 Index : RemovedIndices)
+	{
+		OwnerInventory->OnInventoryItemRemoved.Broadcast(Items[Index].Instance.SlotIndex);
+	}
 }
 
 void FLabInventoryList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)

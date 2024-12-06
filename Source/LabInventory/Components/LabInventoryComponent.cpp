@@ -39,21 +39,21 @@ bool ULabInventoryComponent::TryGetInventoryItemAtSlot(const int32 SlotIndex, FL
 	return false;
 }
 
-FLabAddItemParams ULabInventoryComponent::FindInventorySlotForItem(const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem)
+FLabUpdateInventoryParam ULabInventoryComponent::FindInventorySlotForItem(const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem)
 {
-	FLabAddItemParams Params;
-	Params.Status = InventoryFull;
-	Params.InventoryItem = InventoryItem;
+	FLabUpdateInventoryParam UpdateParams;
+	UpdateParams.Status = InventoryFull;
+	UpdateParams.InventoryItem = InventoryItem;
 
 	if (!InventoryItem.IsValid())
 	{
 		UE_LOG(LogInventory, Warning, TEXT("FindInventorySlotForItem called with an invalid InventoryItem."));
-		Params.Status = InventoryItemInvalid;
-		return Params;
+		UpdateParams.Status = InventoryItemInvalid;
+		return UpdateParams;
 	}
 	
 	// Retrieve item stacking information (stackable and max stack size)
-	RetrieveItemStackingInfo(InventoryItem.Get(), Params.bStackable, Params.StackSize);
+	RetrieveItemStackingInfo(InventoryItem.Get(), UpdateParams.bStackable, UpdateParams.StackSize);
 
 	// Search for an available slot
 	for (int32 SlotIndex = 0; SlotIndex < ItemsSize; ++SlotIndex)
@@ -63,41 +63,92 @@ FLabAddItemParams ULabInventoryComponent::FindInventorySlotForItem(const int32 I
 		// If slot is empty, we can insert the item here
 		if (ItemEntry == nullptr)
 		{
-			Params.SlotIndex = SlotIndex;
-			Params.Status = InsertToSlot;
-			Params.SlotCurrentItemCount = 0;
+			UpdateParams.SlotIndex = SlotIndex;
+			UpdateParams.Status = InsertToSlot;
+			UpdateParams.SlotCurrentItemCount = 0;
 			break;
 		}
 		
 		// If the item in the slot is the same type as the requested item
-		TSoftObjectPtr<ULabInventoryItem> InstanceInventoryItem = ItemEntry->Instance.InventoryItem;
-		if (InstanceInventoryItem.IsValid() && InstanceInventoryItem.Get() == InventoryItem.Get())
+		if (IsItemCompatible(*ItemEntry, InventoryItem))
 		{
 			// If the item is stackable and the slot is full, continue to the next slot
-			if(Params.bStackable)
+			if(UpdateParams.bStackable)
 			{
-				if (Params.StackSize == ItemEntry->Instance.ItemCount)
+				if (UpdateParams.StackSize == ItemEntry->Instance.ItemCount)
 				{
                     // Stack is already full, continue to the next slot
 					continue;
 				}
 				
 				// If stackable, but there is room for more, update the status to update slot
-				Params.Status = UpdateItemSlot;
-				Params.SlotIndex = SlotIndex;
-				Params.SlotCurrentItemCount = ItemEntry->Instance.ItemCount;
+				UpdateParams.Status = UpdateItemSlot;
+				UpdateParams.SlotIndex = SlotIndex;
+				UpdateParams.SlotCurrentItemCount = ItemEntry->Instance.ItemCount;
 				break;
 			}
 		}
 	}
 	
 	// Calculate the max available items that can be added to the found slot
-	Params.SlotMaxAvailableItems = CalculateMaxItemsToAdd(Params.StackSize, Params.SlotCurrentItemCount, ItemCount);
-	
-	return Params;
+	UpdateParams.RemainingSlotCapacity = CalculateMaxItemsToAdd(UpdateParams.StackSize, UpdateParams.SlotCurrentItemCount, ItemCount);
+	return UpdateParams;
 }
 
-bool ULabInventoryComponent::AddInventoryItem(const FLabAddItemParams& Params)
+FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem)
+{
+	FLabUpdateInventoryParam UpdateParams;
+	UpdateParams.SlotIndex = SlotIndex;
+	UpdateParams.InventoryItem = InventoryItem;
+
+	if (!InventoryItem.IsValid())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("CreateMoveToSlotForItem called with an invalid InventoryItem."));
+		UpdateParams.Status = InventoryItemInvalid;
+		return UpdateParams;
+	}
+	
+	// Retrieve item stacking information (stackable and max stack size)
+	RetrieveItemStackingInfo(InventoryItem.Get(), UpdateParams.bStackable, UpdateParams.StackSize);
+
+	if (const FLabInventoryEntry* ItemEntry = InventoryList.GetItemAtSlot(SlotIndex))
+	{
+		if (IsItemCompatible(*ItemEntry, InventoryItem))
+		{
+			// If stackable, but there is room for more, update the status to update slot
+			if(UpdateParams.bStackable && UpdateParams.StackSize > ItemEntry->Instance.ItemCount)
+			{
+				UpdateParams.Status = UpdateItemSlot;
+				UpdateParams.SlotCurrentItemCount = ItemEntry->Instance.ItemCount;
+			}
+			else
+			{
+                UE_LOG(LogInventory, Warning, TEXT("Slot %d is full or incompatible for stacking."), SlotIndex);
+				UpdateParams.Status = UnavailableItemSlot;
+			}
+		}
+		else
+		{
+            UE_LOG(LogInventory, Warning, TEXT("Slot %d contains a different item."), SlotIndex);
+			UpdateParams.Status = UnavailableItemSlot;
+		}
+	}
+	else
+	{
+        // Empty slot available.
+		UpdateParams.Status =  InsertToSlot;
+	}
+	
+	UpdateParams.RemainingSlotCapacity = CalculateMaxItemsToAdd(
+		UpdateParams.StackSize, UpdateParams.SlotCurrentItemCount, ItemCount);
+	
+	UE_LOG(LogInventory, Log, TEXT("CreateMoveToSlotForItem: SlotIndex=%d, Status=%d, RemainingCapacity=%d"),
+		   SlotIndex, UpdateParams.Status.GetValue(), UpdateParams.RemainingSlotCapacity);
+	
+	return UpdateParams;
+}
+
+bool ULabInventoryComponent::AddInventoryItem(const FLabUpdateInventoryParam& Params)
 {
 	const AActor* Owner = GetOwner();
 	if (Owner->HasAuthority())
@@ -106,12 +157,12 @@ bool ULabInventoryComponent::AddInventoryItem(const FLabAddItemParams& Params)
 		
 		if (Params.Status == InsertToSlot)
 		{
-			bResult = InventoryList.AddItem(Params.SlotIndex, Params.SlotMaxAvailableItems, Params.InventoryItem);
+			bResult = InventoryList.AddItem(Params.SlotIndex, Params.RemainingSlotCapacity, Params.InventoryItem);
 		}
 
 		if (Params.Status == UpdateItemSlot)
 		{
-			bResult = InventoryList.AddItemCount(Params.SlotIndex, Params.SlotMaxAvailableItems);
+			bResult = InventoryList.AddItemCount(Params.SlotIndex, Params.RemainingSlotCapacity);
 		}
 
 		if (bResult)
@@ -123,6 +174,32 @@ bool ULabInventoryComponent::AddInventoryItem(const FLabAddItemParams& Params)
 	}
 
 	return false;
+}
+
+bool ULabInventoryComponent::RemoveInventoryItem(const int32 SlotIndex, const int32 ItemCount)
+{
+	if (InventoryList.RemoveItemCount(SlotIndex, ItemCount))
+	{
+		if (const FLabInventoryEntry* ItemEntry = InventoryList.GetItemAtSlot(SlotIndex))
+		{
+			OnInventoryItemUpdated.Broadcast(ItemEntry->Instance);
+		}
+		else
+		{
+			OnInventoryItemRemoved.Broadcast(SlotIndex);
+		}
+		
+		return true;	
+	}
+	
+	return false;
+}
+
+bool ULabInventoryComponent::IsItemCompatible(const FLabInventoryEntry& ItemEntry, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem) const
+{
+	const TSoftObjectPtr<ULabInventoryItem> InstanceInventoryItem = ItemEntry.Instance.InventoryItem;
+	
+	return InstanceInventoryItem.IsValid() && InstanceInventoryItem.Get() == InventoryItem.Get();
 }
 
 void ULabInventoryComponent::RetrieveItemStackingInfo(const ULabInventoryItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const

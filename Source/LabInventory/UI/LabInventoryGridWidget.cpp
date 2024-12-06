@@ -31,7 +31,8 @@ void ULabInventoryGridWidget::InitInventory(AActor* Owner)
 
 	CreateInventorySlots();
 
-	OwnerInventory->OnInventoryItemUpdated.AddDynamic(this, &ThisClass::OnInventoryUpdated);
+	OwnerInventory->OnInventoryItemUpdated.AddDynamic(this, &ThisClass::HandleInventoryItemUpdated);
+	OwnerInventory->OnInventoryItemRemoved.AddDynamic(this, &ThisClass::HandleInventoryItemRemoved);
 	
 	OnInitializeInventory();
 }
@@ -74,7 +75,7 @@ void ULabInventoryGridWidget::CreateInventorySlots() const
 	}
 }
 
-void ULabInventoryGridWidget::OnInventoryUpdated(const FLabInventoryItemInstance& Instance)
+void ULabInventoryGridWidget::HandleInventoryItemUpdated(const FLabInventoryItemInstance& Instance)
 {
 	if (Instance.InventoryItem.IsValid())
 	{
@@ -85,5 +86,16 @@ void ULabInventoryGridWidget::OnInventoryUpdated(const FLabInventoryItemInstance
 			ItemEntry->InventoryItem = Instance.InventoryItem.Get();
 			ItemEntry->UpdateInventorySlotDisplay.Broadcast();
 		}
+	}
+}
+
+void ULabInventoryGridWidget::HandleInventoryItemRemoved(const int RemovedSlotIndex)
+{
+	UObject* SlotEntry = InventorySlots->GetItemAt(RemovedSlotIndex);
+	if (ULabInventorySlotEntry* ItemEntry = Cast<ULabInventorySlotEntry>(SlotEntry))
+	{
+		ItemEntry->ItemCount = 0;
+		ItemEntry->InventoryItem = nullptr;
+		ItemEntry->UpdateInventorySlotDisplay.Broadcast();
 	}
 }

@@ -3,8 +3,9 @@
 
 #include "LabInventoryStatics.h"
 
+#include "LabInventory/LabInventory.h"
 #include "LabInventory/Components/LabInventoryComponent.h"
-#include "LabInventory/Core/LabAddItemParams.h"
+#include "LabInventory/Core/LabUpdateInventoryParam.h"
 #include "LabInventory/Items/LabInventoryItem.h"
 #include "LabInventory/Items/LabItemFragment.h"
 
@@ -23,7 +24,7 @@ FLabInventoryTransactionResult ULabInventoryStatics::TryAddItemToInventory(AActo
 		// Try adding items until the inventory is full or no more items can be added
 		while (RemainingItemCount  > 0)
 		{
-			const FLabAddItemParams Params = InventoryComponent->FindInventorySlotForItem(RemainingItemCount , ItemDefinition);
+			const FLabUpdateInventoryParam Params = InventoryComponent->FindInventorySlotForItem(RemainingItemCount , ItemDefinition);
 			
 			// If no suitable slot found (inventory full or unavailable slot), exit the loop
 			if (Params.Status == InventoryFull ||
@@ -36,7 +37,7 @@ FLabInventoryTransactionResult ULabInventoryStatics::TryAddItemToInventory(AActo
 			// Attempt to add the item and update the remaining count
 			if (InventoryComponent->AddInventoryItem(Params))
 			{
-				RemainingItemCount  -= Params.SlotMaxAvailableItems;
+				RemainingItemCount  -= Params.RemainingSlotCapacity;
 			}
 		}
 
@@ -64,6 +65,58 @@ FLabInventoryTransactionResult ULabInventoryStatics::TryAddItemToInventory(AActo
 	}
 	
 	return TransactionResult;
+}
+
+void ULabInventoryStatics::MoveInventoryItem(const FLabMoveInventoryItemParam& MoveItemParam)
+{
+	if (MoveItemParam.SourceInventory.IsValid() && MoveItemParam.TargetInventory.IsValid())
+	{
+		const int32 SourceSlotIndex = MoveItemParam.SourceSlotIndex;
+		const int32 TargetSlotIndex = MoveItemParam.TargetSlotIndex;
+		ULabInventoryComponent* SourceInventory = MoveItemParam.SourceInventory.Get();
+		ULabInventoryComponent* TargetInventory = MoveItemParam.TargetInventory.Get();
+
+		if (SourceSlotIndex == TargetSlotIndex && SourceInventory == TargetInventory)
+		{
+			return;
+		}
+
+		FLabInventoryItemInstance ItemInstance;
+		if (SourceInventory->TryGetInventoryItemAtSlot(SourceSlotIndex, ItemInstance))
+		{
+			// check if TSoftObjectPtr<ULabInventoryItem> is valid or loaded
+			if (ItemInstance.InventoryItem.IsValid())
+			{
+				const FLabUpdateInventoryParam Param = TargetInventory->CreateMoveToSlotForItem(
+					TargetSlotIndex, ItemInstance.ItemCount, ItemInstance.InventoryItem);
+
+				if (Param.Status == UnavailableItemSlot || Param.Status == InventoryItemInvalid)
+				{
+					UE_LOG(LogInventory, Warning, TEXT("Failed to move item. Slot unavailable or item invalid."));
+					return;
+				}
+
+				TargetInventory->AddInventoryItem(Param);
+
+				const int32 MovedItemCount = Param.RemainingSlotCapacity;
+				SourceInventory->RemoveInventoryItem(SourceSlotIndex, MovedItemCount);
+
+				UE_LOG(LogInventory, Log, TEXT("Moved %d items from slot %d to slot %d."), MovedItemCount, SourceSlotIndex, TargetSlotIndex);
+			}
+			else
+			{
+				UE_LOG(LogInventory, Warning, TEXT("Source inventory item is invalid or unloaded."));
+			}
+		}
+		else
+		{
+			UE_LOG(LogInventory, Warning, TEXT("No item found in source inventory slot %d."), SourceSlotIndex);
+		}
+	}
+	else
+	{
+		UE_LOG(LogInventory, Error, TEXT("Invalid source or target inventory."));
+	}
 }
 
 const ULabItemFragment* ULabInventoryStatics::FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem, const TSubclassOf<ULabItemFragment> FragmentClass)

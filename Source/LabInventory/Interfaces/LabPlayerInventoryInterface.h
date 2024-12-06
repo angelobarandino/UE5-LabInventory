@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "LabPlayerInventoryInterface.generated.h"
 
+struct FLabMoveInventoryItemParam;
 class ULabInventoryComponent;
 
 // This class does not need to be modified.
@@ -24,6 +25,7 @@ class LABINVENTORY_API ILabPlayerInventoryInterface
 
 public:
 
-	virtual ULabInventoryComponent* GetInventoryComponent() const = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void MoveInventoryItem(const FLabMoveInventoryItemParam& MoveItemParam);
 	
 };

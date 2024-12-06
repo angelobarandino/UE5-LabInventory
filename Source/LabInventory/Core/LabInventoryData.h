@@ -6,7 +6,7 @@
 
 #include "LabInventoryData.generated.h"
 
-struct FLabAddItemParams;
+struct FLabUpdateInventoryParam;
 class ULabInventoryComponent;
 class ULabInventoryItem;
 

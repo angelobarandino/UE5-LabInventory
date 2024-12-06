@@ -6,7 +6,10 @@
 #include "LabInventoryGridWidget.h"
 #include "LabItemDraggedPreviewWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "LabInventory/LabInventory.h"
+#include "LabInventory/Core/LabUpdateInventoryParam.h"
+#include "LabInventory/Interfaces/LabPlayerInventoryInterface.h"
 
 
 bool ULabInventorySlotWidget::HasValidItem() const
@@ -23,11 +26,11 @@ void ULabInventorySlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	if (ListItemObject)
 	{
-		InventorySlotEntry = Cast<ULabInventorySlotEntry>(ListItemObject);
+		SlotItemData = Cast<ULabInventorySlotEntry>(ListItemObject);
 
-		ItemCount = InventorySlotEntry->ItemCount;
-		InventoryItem = InventorySlotEntry->InventoryItem;
-		InventorySlotEntry->UpdateInventorySlotDisplay.AddUObject(this, &ThisClass::HandleUpdateDisplay);
+		ItemCount = SlotItemData->ItemCount;
+		InventoryItem = SlotItemData->InventoryItem;
+		SlotItemData->UpdateInventorySlotDisplay.AddUObject(this, &ThisClass::HandleUpdateDisplay);
 		
 		HandleUpdateDisplay();
 	}
@@ -35,11 +38,11 @@ void ULabInventorySlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 
 void ULabInventorySlotWidget::NativeOnEntryReleased()
 {
-	if (InventorySlotEntry)
+	if (SlotItemData.IsValid())
 	{
 		ItemCount = 0;
 		InventoryItem = nullptr;
-		InventorySlotEntry->UpdateInventorySlotDisplay.Clear();
+		SlotItemData->UpdateInventorySlotDisplay.Clear();
 		UpdateDisplay();
 	}
 }
@@ -80,7 +83,7 @@ void ULabInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, 
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
-	if (HasValidItem() && InventorySlotEntry && InventorySlotEntry->Inventory.IsValid())
+	if (HasValidItem() && SlotItemData.IsValid() && SlotItemData->Inventory.IsValid())
 	{
 		UUserWidget* PreviewWidget = CreateDragPreviewWidget();
 		if (!PreviewWidget)
@@ -91,14 +94,14 @@ void ULabInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, 
 		
 		if (ULabItemDraggedPreviewWidget* ItemPreviewWidget = Cast<ULabItemDraggedPreviewWidget>(PreviewWidget))
 		{
-			ItemPreviewWidget->InitializePreview(InventorySlotEntry);
+			ItemPreviewWidget->InitializePreview(SlotItemData.Get());
 		}
 		
 		ULabDragDropOps* Operation = Cast<ULabDragDropOps>(UWidgetBlueprintLibrary::CreateDragDropOperation(ULabDragDropOps::StaticClass()));
 		if (Operation)
 		{
 			Operation->DefaultDragVisual = PreviewWidget;
-			Operation->ItemSlotData = InventorySlotEntry;
+			Operation->DraggedSlotItemData = SlotItemData;
 			OutOperation = Operation;				
 		}
 	}
@@ -106,6 +109,27 @@ void ULabInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, 
 
 bool ULabInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+	const ULabDragDropOps* Operation = Cast<ULabDragDropOps>(InOperation);
+	if (Operation && Operation->DraggedSlotItemData.IsValid())
+	{
+		if (APlayerController* PlayerController = GetOwningPlayer())
+		{
+			if (PlayerController->Implements<ULabPlayerInventoryInterface>())
+			{
+				FLabMoveInventoryItemParam MoveItemParam;
+				MoveItemParam.SourceInventory = Operation->DraggedSlotItemData->Inventory;
+				MoveItemParam.SourceSlotIndex = Operation->DraggedSlotItemData->SlotIndex;
+				MoveItemParam.TargetInventory = SlotItemData->Inventory;
+				MoveItemParam.TargetSlotIndex = SlotItemData->SlotIndex;
+				ILabPlayerInventoryInterface::Execute_MoveInventoryItem(PlayerController, MoveItemParam);
+			}
+			else
+			{
+				UE_LOG(LogInventory, Warning, TEXT("PlayerController does not implement ULabPlayerInventoryInterface"));
+			}
+		}
+	}
+
 	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
@@ -133,10 +157,10 @@ UUserWidget* ULabInventorySlotWidget::CreateDragPreviewWidget() const
 
 void ULabInventorySlotWidget::HandleUpdateDisplay()
 {
-	if (InventorySlotEntry && InventorySlotEntry->InventoryItem != nullptr)
+	if (SlotItemData.IsValid())
 	{
-		ItemCount = InventorySlotEntry->ItemCount;
-		InventoryItem = InventorySlotEntry->InventoryItem;
+		ItemCount = SlotItemData->ItemCount;
+		InventoryItem = SlotItemData->InventoryItem;
 		UpdateDisplay();
 	}
 }

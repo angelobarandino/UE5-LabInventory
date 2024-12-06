@@ -19,7 +19,7 @@ class LABINVENTORY_API ULabDragDropOps : public UDragDropOperation
 	GENERATED_BODY()
 
 public:
-	TWeakObjectPtr<ULabInventorySlotEntry> ItemSlotData;
+	TWeakObjectPtr<ULabInventorySlotEntry> DraggedSlotItemData;
 	
 };
 
@@ -31,14 +31,14 @@ class LABINVENTORY_API ULabInventorySlotWidget : public UUserWidget, public IUse
 public:
 	bool HasValidItem() const;
 	
-	int32 GetSlotIndex() const { return InventorySlotEntry->SlotIndex; }
+	int32 GetSlotIndex() const { return SlotItemData->SlotIndex; }
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<ULabItemDraggedPreviewWidget> ItemDragPreviewWidgetClass;
 	
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<ULabInventorySlotEntry> InventorySlotEntry;
+	TWeakObjectPtr<ULabInventorySlotEntry> SlotItemData;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<const ULabInventoryItem> InventoryItem = nullptr;
@@ -64,7 +64,6 @@ protected:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	// ~End UUserWidget
-	
 
 private:
 	mutable TWeakObjectPtr<UUserWidget> CachedPreviewWidget;

@@ -58,7 +58,10 @@ private:
 	void CreateInventorySlots() const;
 		
 	UFUNCTION()
-	void OnInventoryUpdated(const FLabInventoryItemInstance& Instance);
+	void HandleInventoryItemUpdated(const FLabInventoryItemInstance& Instance);
+
+	UFUNCTION()
+	void HandleInventoryItemRemoved(const int RemovedSlotIndex);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Data", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<AActor> OwnerActor = nullptr;

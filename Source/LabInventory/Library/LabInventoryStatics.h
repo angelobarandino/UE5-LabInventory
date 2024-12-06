@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "LabInventoryStatics.generated.h"
 
+struct FLabMoveInventoryItemParam;
 class ULabInventoryComponent;
 class ULabItemFragment;
 class ULabInventoryItem;
@@ -43,6 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, category = "LAB Inventory Statics")
 	static FLabInventoryTransactionResult TryAddItemToInventory(AActor* TargetActor, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& ItemDefinition);
 
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, category = "LAB Inventory Statics")
+	static void MoveInventoryItem(const FLabMoveInventoryItemParam& MoveItemParam);
+	
 	UFUNCTION(BlueprintCallable, category = "LAB Inventory Statics", meta=(DeterminesOutputType=FragmentClass))
 	static const ULabItemFragment* FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem, TSubclassOf<ULabItemFragment> FragmentClass);
 
