@@ -16,5 +16,7 @@ class LABINVENTORY_API ULabInventoryItemTooltip : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void InitTooltip(const int32 ItemCount, const ULabInventoryItem* InventoryItem);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void InitializeTooltip(const int32 ItemCount, const ULabInventoryItem* InventoryItem);
 };

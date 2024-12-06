@@ -2,8 +2,3 @@
 
 
 #include "LabInventoryItemTooltip.h"
-
-void ULabInventoryItemTooltip::InitTooltip(const int32 ItemCount, const ULabInventoryItem* InventoryItem)
-{
-	
-}

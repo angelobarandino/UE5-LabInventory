@@ -222,7 +222,7 @@ void ULabInventorySlotWidget::InitTooltipWidget()
 
 		if (CachedTooltipWidget.IsValid())
 		{
-			CachedTooltipWidget->InitTooltip(ItemCount, InventoryItem);
+			CachedTooltipWidget->InitializeTooltip(ItemCount, InventoryItem);
 			SetToolTip(CachedTooltipWidget.Get());
 		}
 	}
