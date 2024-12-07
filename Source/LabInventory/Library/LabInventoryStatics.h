@@ -27,10 +27,10 @@ struct FLabInventoryTransactionResult
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EInventoryUpdateResult ChangeResult = EInventoryUpdateResult::Failure;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 ItemsAffectedCount = 0;
 };
 
