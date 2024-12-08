@@ -25,7 +25,7 @@ void ULabInventoryGridWidget::InitInventory(AActor* Owner)
 
 	if (OwnerInventory == nullptr)
 	{
-		UE_LOG(LogInventory, Error, TEXT("OwnerActor doesn't have attached InventoryComponent"));
+		UE_LOG(LogLabInventory, Error, TEXT("OwnerActor doesn't have attached InventoryComponent"));
 		return;
 	}
 
@@ -63,7 +63,7 @@ void ULabInventoryGridWidget::CreateInventorySlots() const
 					}
 					else
 					{
-						UE_LOG(LogInventory, Warning, TEXT("Failed to load InventoryItem at slot %d"), Entry->SlotIndex);
+						UE_LOG(LogLabInventory, Warning, TEXT("Failed to load InventoryItem at slot %d"), Entry->SlotIndex);
 					}
 					
 					Entry->UpdateInventorySlotDisplay.Broadcast();

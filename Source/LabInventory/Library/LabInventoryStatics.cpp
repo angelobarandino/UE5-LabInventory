@@ -92,7 +92,7 @@ void ULabInventoryStatics::MoveInventoryItem(const FLabMoveInventoryItemParam& M
 
 				if (Param.Status == UnavailableItemSlot || Param.Status == InventoryItemInvalid)
 				{
-					UE_LOG(LogInventory, Warning, TEXT("Failed to move item. Slot unavailable or item invalid."));
+					UE_LOG(LogLabInventory, Warning, TEXT("Failed to move item. Slot unavailable or item invalid."));
 					return;
 				}
 
@@ -101,21 +101,21 @@ void ULabInventoryStatics::MoveInventoryItem(const FLabMoveInventoryItemParam& M
 				const int32 MovedItemCount = Param.RemainingSlotCapacity;
 				SourceInventory->RemoveInventoryItem(SourceSlotIndex, MovedItemCount);
 
-				UE_LOG(LogInventory, Log, TEXT("Moved %d items from slot %d to slot %d."), MovedItemCount, SourceSlotIndex, TargetSlotIndex);
+				UE_LOG(LogLabInventory, Log, TEXT("Moved %d items from slot %d to slot %d."), MovedItemCount, SourceSlotIndex, TargetSlotIndex);
 			}
 			else
 			{
-				UE_LOG(LogInventory, Warning, TEXT("Source inventory item is invalid or unloaded."));
+				UE_LOG(LogLabInventory, Warning, TEXT("Source inventory item is invalid or unloaded."));
 			}
 		}
 		else
 		{
-			UE_LOG(LogInventory, Warning, TEXT("No item found in source inventory slot %d."), SourceSlotIndex);
+			UE_LOG(LogLabInventory, Warning, TEXT("No item found in source inventory slot %d."), SourceSlotIndex);
 		}
 	}
 	else
 	{
-		UE_LOG(LogInventory, Error, TEXT("Invalid source or target inventory."));
+		UE_LOG(LogLabInventory, Error, TEXT("Invalid source or target inventory."));
 	}
 }
 

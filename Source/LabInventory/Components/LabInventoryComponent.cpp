@@ -47,7 +47,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::FindInventorySlotForItem(const 
 
 	if (!InventoryItem.IsValid())
 	{
-		UE_LOG(LogInventory, Warning, TEXT("FindInventorySlotForItem called with an invalid InventoryItem."));
+		UE_LOG(LogLabInventory, Warning, TEXT("FindInventorySlotForItem called with an invalid InventoryItem."));
 		UpdateParams.Status = InventoryItemInvalid;
 		return UpdateParams;
 	}
@@ -103,7 +103,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const i
 
 	if (!InventoryItem.IsValid())
 	{
-		UE_LOG(LogInventory, Warning, TEXT("CreateMoveToSlotForItem called with an invalid InventoryItem."));
+		UE_LOG(LogLabInventory, Warning, TEXT("CreateMoveToSlotForItem called with an invalid InventoryItem."));
 		UpdateParams.Status = InventoryItemInvalid;
 		return UpdateParams;
 	}
@@ -123,13 +123,13 @@ FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const i
 			}
 			else
 			{
-                UE_LOG(LogInventory, Warning, TEXT("Slot %d is full or incompatible for stacking."), SlotIndex);
+                UE_LOG(LogLabInventory, Warning, TEXT("Slot %d is full or incompatible for stacking."), SlotIndex);
 				UpdateParams.Status = UnavailableItemSlot;
 			}
 		}
 		else
 		{
-            UE_LOG(LogInventory, Warning, TEXT("Slot %d contains a different item."), SlotIndex);
+            UE_LOG(LogLabInventory, Warning, TEXT("Slot %d contains a different item."), SlotIndex);
 			UpdateParams.Status = UnavailableItemSlot;
 		}
 	}
@@ -142,7 +142,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const i
 	UpdateParams.RemainingSlotCapacity = CalculateMaxItemsToAdd(
 		UpdateParams.StackSize, UpdateParams.SlotCurrentItemCount, ItemCount);
 	
-	UE_LOG(LogInventory, Log, TEXT("CreateMoveToSlotForItem: SlotIndex=%d, Status=%d, RemainingCapacity=%d"),
+	UE_LOG(LogLabInventory, Log, TEXT("CreateMoveToSlotForItem: SlotIndex=%d, Status=%d, RemainingCapacity=%d"),
 		   SlotIndex, UpdateParams.Status.GetValue(), UpdateParams.RemainingSlotCapacity);
 	
 	return UpdateParams;
@@ -153,7 +153,7 @@ bool ULabInventoryComponent::CanMoveItemToSlot(const int32 SlotIndex, const ULab
 	// Ensure the InventoryItem is valid.
 	if (!InventoryItem)
 	{
-		UE_LOG(LogInventory, Warning, TEXT("CanMoveItemToSlot: Invalid InventoryItem passed."));
+		UE_LOG(LogLabInventory, Warning, TEXT("CanMoveItemToSlot: Invalid InventoryItem passed."));
 		return false;
 	}
 
@@ -179,11 +179,11 @@ bool ULabInventoryComponent::CanMoveItemToSlot(const int32 SlotIndex, const ULab
 			return true;
 		}
 
-		UE_LOG(LogInventory, Warning, TEXT("CanMoveItemToSlot: Slot %d cannot accommodate more of this item (stack full)."), SlotIndex);
+		UE_LOG(LogLabInventory, Warning, TEXT("CanMoveItemToSlot: Slot %d cannot accommodate more of this item (stack full)."), SlotIndex);
 	}
 	else
 	{
-		UE_LOG(LogInventory, Warning, TEXT("CanMoveItemToSlot: Slot %d contains an incompatible item."), SlotIndex);
+		UE_LOG(LogLabInventory, Warning, TEXT("CanMoveItemToSlot: Slot %d contains an incompatible item."), SlotIndex);
 	}
 	
 	// Slot is occupied and incompatible, or stack is full.

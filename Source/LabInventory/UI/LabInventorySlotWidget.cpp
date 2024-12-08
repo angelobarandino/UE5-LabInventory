@@ -101,7 +101,7 @@ void ULabInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, 
 		UUserWidget* PreviewWidget = CreateDragPreviewWidget();
 		if (!PreviewWidget)
 		{
-			UE_LOG(LogInventory, Warning, TEXT("Failed to create drag preview widget."));
+			UE_LOG(LogLabInventory, Warning, TEXT("Failed to create drag preview widget."));
 			return;
 		}
 		
@@ -159,11 +159,11 @@ bool ULabInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FD
 				}
 			}
 
-			UE_LOG(LogInventory, Warning, TEXT("PlayerController is missing or does not implement ULabPlayerInventoryInterface"));
+			UE_LOG(LogLabInventory, Warning, TEXT("PlayerController is missing or does not implement ULabPlayerInventoryInterface"));
 		}
 		else
 		{
-			UE_LOG(LogInventory, Warning, TEXT("Dropped item contains missing or invalid payload."));
+			UE_LOG(LogLabInventory, Warning, TEXT("Dropped item contains missing or invalid payload."));
 		}
 	}
 
@@ -174,7 +174,7 @@ UUserWidget* ULabInventorySlotWidget::CreateDragPreviewWidget()
 {
 	if (!ItemDragPreviewWidgetClass)
 	{
-		UE_LOG(LogInventory, Warning, TEXT("ItemDragPreviewWidgetClass is null."));
+		UE_LOG(LogLabInventory, Warning, TEXT("ItemDragPreviewWidgetClass is null."));
 		return nullptr;
 	}
 

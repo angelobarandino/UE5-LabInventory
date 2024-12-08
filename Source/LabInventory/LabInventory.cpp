@@ -20,4 +20,4 @@ void FLabInventoryModule::ShutdownModule()
 	
 IMPLEMENT_MODULE(FLabInventoryModule, LAB_Inventory)
 
-DEFINE_LOG_CATEGORY(LogInventory);
+DEFINE_LOG_CATEGORY(LogLabInventory);

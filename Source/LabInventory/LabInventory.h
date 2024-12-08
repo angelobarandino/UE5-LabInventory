@@ -15,4 +15,4 @@ public:
 };
 
 
-DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogLabInventory, Log, All);

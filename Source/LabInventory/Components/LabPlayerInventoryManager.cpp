@@ -74,7 +74,7 @@ UUserWidget* ULabPlayerInventoryManager::GetOrCreateItemPreview(const UObject* O
 
 	if (!PreviewWidgetClass)
 	{
-		UE_LOG(LogInventory, Warning, TEXT("PreviewWidgetClass is null."));
+		UE_LOG(LogLabInventory, Warning, TEXT("PreviewWidgetClass is null."));
 		return nullptr;
 	}
 	
