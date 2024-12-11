@@ -41,19 +41,19 @@ class LABINVENTORY_API ULabInventoryStatics : public UBlueprintFunctionLibrary
 
 public:
 	
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, category = "LAB Inventory Statics")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "LAB Inventory Statics")
 	static FLabInventoryTransactionResult TryAddItemToInventory(AActor* TargetActor, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& ItemDefinition);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, category = "LAB Inventory Statics")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "LAB Inventory Statics")
 	static void MoveInventoryItem(const FLabMoveInventoryItemParam& MoveItemParam);
 	
-	UFUNCTION(BlueprintCallable, category = "LAB Inventory Statics", meta=(DeterminesOutputType=FragmentClass))
+	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics", meta=(DeterminesOutputType=FragmentClass))
 	static const ULabItemFragment* FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem, TSubclassOf<ULabItemFragment> FragmentClass);
 
-	UFUNCTION(BlueprintCallable, category = "LAB Inventory Statics")
+	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics")
 	static ULabInventoryComponent* GetInventoryComponent(AActor* Actor);
 	
-	UFUNCTION(BlueprintCallable, category = "LAB Inventory Statics")
+	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics")
 	static const ULabInventoryComponent* GetInventoryComponentConst(AActor* Actor);
 
 	template<typename TFragmentClass>
