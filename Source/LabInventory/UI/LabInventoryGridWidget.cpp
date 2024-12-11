@@ -15,29 +15,38 @@
 ULabInventoryGridWidget::ULabInventoryGridWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bIsInitialized = false;
 }
 
 void ULabInventoryGridWidget::InitInventory(AActor* Owner)
 {
-	OwnerActor = Owner;
-	
-	OwnerInventory = ULabInventoryStatics::GetInventoryComponent(Owner);
-
-	if (OwnerInventory == nullptr)
-	{
-		UE_LOG(LogLabInventory, Error, TEXT("OwnerActor doesn't have attached InventoryComponent"));
+	if (bIsInitialized && OwnerActor == Owner)
 		return;
-	}
-
-	CreateInventorySlots();
-
-	OwnerInventory->OnInventoryItemUpdated.AddDynamic(this, &ThisClass::HandleInventoryItemUpdated);
-	OwnerInventory->OnInventoryItemRemoved.AddDynamic(this, &ThisClass::HandleInventoryItemRemoved);
 	
-	OnInitializeInventory();
+	if (OwnerActor != Owner)
+	{
+		OwnerActor = Owner;
+		OwnerInventory = ULabInventoryStatics::GetInventoryComponent(Owner);
+
+		if (OwnerInventory == nullptr)
+		{
+			UE_LOG(LogLabInventory, Error, TEXT("OwnerActor doesn't have attached InventoryComponent"));
+			return;
+		}
+		
+		CreateInventorySlots();
+		OnInitializeInventory();
+		
+		OwnerInventory->OnInventoryItemUpdated.Clear();
+		OwnerInventory->OnInventoryItemRemoved.Clear();
+		OwnerInventory->OnInventoryItemUpdated.AddDynamic(this, &ThisClass::HandleInventoryItemUpdated);
+		OwnerInventory->OnInventoryItemRemoved.AddDynamic(this, &ThisClass::HandleInventoryItemRemoved);
+		
+		bIsInitialized = true;
+	}
 }
 
-void ULabInventoryGridWidget::CreateInventorySlots() const
+void ULabInventoryGridWidget::CreateInventorySlots()
 {
 	if (OwnerInventory == nullptr)
 		return;

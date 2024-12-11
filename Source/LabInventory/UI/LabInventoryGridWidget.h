@@ -55,7 +55,7 @@ protected:
 	
 private:
 
-	void CreateInventorySlots() const;
+	void CreateInventorySlots();
 		
 	UFUNCTION()
 	void HandleInventoryItemUpdated(const FLabInventoryItemInstance& Instance);
@@ -69,4 +69,5 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Data", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ULabInventoryComponent> OwnerInventory = nullptr;
 
+	bool bIsInitialized = false;
 };
