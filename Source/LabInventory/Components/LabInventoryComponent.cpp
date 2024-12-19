@@ -237,6 +237,17 @@ bool ULabInventoryComponent::RemoveInventoryItem(const int32 SlotIndex, const in
 	return false;
 }
 
+TArray<FLabInventoryItemInstance> ULabInventoryComponent::GetInventoryItems() const
+{
+	TArray<FLabInventoryItemInstance> InventoryItems;
+	for (int Index = 0; Index < InventoryList.Items.Num(); ++Index)
+	{
+		const FLabInventoryEntry& Item = InventoryList.Items[Index];
+		InventoryItems.Add(Item.Instance);
+	}
+	return InventoryItems;
+}
+
 bool ULabInventoryComponent::IsItemCompatible(const FLabInventoryEntry& ItemEntry, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem) const
 {
 	const TSoftObjectPtr<ULabInventoryItem> InstanceInventoryItem = ItemEntry.Instance.InventoryItem;

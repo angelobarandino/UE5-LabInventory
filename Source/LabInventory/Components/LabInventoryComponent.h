@@ -50,6 +50,9 @@ public:
 	UFUNCTION()
 	bool RemoveInventoryItem(const int32 SlotIndex, const int32 ItemCount);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FLabInventoryItemInstance> GetInventoryItems() const;
+	
 private:
 
 	UPROPERTY(Replicated)
