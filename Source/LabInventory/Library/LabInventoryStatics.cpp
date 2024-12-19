@@ -37,7 +37,7 @@ FLabInventoryTransactionResult ULabInventoryStatics::TryAddItemToInventory(AActo
 			// Attempt to add the item and update the remaining count
 			if (InventoryComponent->AddInventoryItem(Params))
 			{
-				RemainingItemCount  -= Params.RemainingSlotCapacity;
+				RemainingItemCount -= Params.RemainingSlotCapacity;
 			}
 		}
 
@@ -116,6 +116,47 @@ void ULabInventoryStatics::MoveInventoryItem(const FLabMoveInventoryItemParam& M
 	else
 	{
 		UE_LOG(LogLabInventory, Error, TEXT("Invalid source or target inventory."));
+	}
+}
+
+void ULabInventoryStatics::TransferAllInventoryItems(ULabInventoryComponent* SourceInventory, ULabInventoryComponent* TargetInventory)
+{
+	if (SourceInventory == nullptr || TargetInventory == nullptr)
+		return;
+	
+	if (SourceInventory == TargetInventory)
+		return;
+
+	TArray<FLabInventoryItemInstance> Items = SourceInventory->GetInventoryItems();
+	for (int32 Index = 0; Index < Items.Num(); Index++)
+	{
+		FLabUpdateInventoryParam UpdateParam;
+		
+		const FLabInventoryItemInstance& ItemInstance = Items[Index];
+		if (ItemInstance.InventoryItem.IsValid())
+		{
+			int32 RemainingItemCount = ItemInstance.ItemCount;
+			while (RemainingItemCount > 0)
+			{
+				UpdateParam = TargetInventory->FindInventorySlotForItem(RemainingItemCount, ItemInstance.InventoryItem);
+				if (!UpdateParam.CanAddItems())
+					break;
+				
+				if (UpdateParam.InventoryItem.IsValid())
+				{
+					const bool bItemAdded = TargetInventory->AddInventoryItem(UpdateParam);
+					if (bItemAdded)
+					{
+						const int32 ItemCountToRemove = UpdateParam.RemainingSlotCapacity;
+						SourceInventory->RemoveInventoryItem(ItemInstance.SlotIndex, ItemCountToRemove);
+						RemainingItemCount -= ItemCountToRemove;
+					}
+				}
+			}
+		}
+		
+		if (UpdateParam.Status == InventoryFull)
+			break;
 	}
 }
 

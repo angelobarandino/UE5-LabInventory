@@ -41,6 +41,11 @@ struct FLabUpdateInventoryParam
 
 	UPROPERTY()
 	TEnumAsByte<ELabInventorySlotStatus> Status = InventoryFull;
+
+	FORCEINLINE bool CanAddItems() const
+	{
+		return Status == InsertToSlot || Status == UpdateItemSlot;
+	}
 };
 
 USTRUCT(BlueprintType)

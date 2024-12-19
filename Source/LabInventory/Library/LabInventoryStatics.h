@@ -46,14 +46,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "LAB Inventory Statics")
 	static void MoveInventoryItem(const FLabMoveInventoryItemParam& MoveItemParam);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "LAB Inventory Statics")
+	static void TransferAllInventoryItems(ULabInventoryComponent* SourceInventory, ULabInventoryComponent* TargetInventory);
 	
 	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics", meta=(DeterminesOutputType=FragmentClass))
 	static const ULabItemFragment* FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem, TSubclassOf<ULabItemFragment> FragmentClass);
 
-	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LAB Inventory Statics")
 	static ULabInventoryComponent* GetInventoryComponent(AActor* Actor);
 	
-	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LAB Inventory Statics")
 	static const ULabInventoryComponent* GetInventoryComponentConst(AActor* Actor);
 
 	template<typename TFragmentClass>
