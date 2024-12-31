@@ -59,7 +59,7 @@ private:
 	FLabInventoryList InventoryList;
 
 	UFUNCTION()
-	bool IsItemCompatible(const FLabInventoryEntry& ItemEntry, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem) const;
+	bool IsItemCompatible(const FLabInventoryEntry& ItemEntry, const ULabInventoryItem* InventoryItem) const;
 
 	UFUNCTION()
 	void RetrieveItemStackingInfo(const ULabInventoryItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const;

@@ -70,7 +70,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::FindInventorySlotForItem(const 
 		}
 		
 		// If the item in the slot is the same type as the requested item
-		if (IsItemCompatible(*ItemEntry, InventoryItem))
+		if (IsItemCompatible(*ItemEntry, InventoryItem.Get()))
 		{
 			// If the item is stackable and the slot is full, continue to the next slot
 			if(UpdateParams.bStackable)
@@ -113,7 +113,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const i
 
 	if (const FLabInventoryEntry* ItemEntry = InventoryList.GetItemAtSlot(SlotIndex))
 	{
-		if (IsItemCompatible(*ItemEntry, InventoryItem))
+		if (IsItemCompatible(*ItemEntry, InventoryItem.Get()))
 		{
 			// If stackable, but there is room for more, update the status to update slot
 			if(UpdateParams.bStackable && UpdateParams.StackSize > ItemEntry->Instance.ItemCount)
@@ -248,11 +248,11 @@ TArray<FLabInventoryItemInstance> ULabInventoryComponent::GetInventoryItems() co
 	return InventoryItems;
 }
 
-bool ULabInventoryComponent::IsItemCompatible(const FLabInventoryEntry& ItemEntry, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem) const
+bool ULabInventoryComponent::IsItemCompatible(const FLabInventoryEntry& ItemEntry, const ULabInventoryItem* InventoryItem) const
 {
 	const TSoftObjectPtr<ULabInventoryItem> InstanceInventoryItem = ItemEntry.Instance.InventoryItem;
 	
-	return InstanceInventoryItem.IsValid() && InstanceInventoryItem.Get() == InventoryItem.Get();
+	return InstanceInventoryItem.IsValid() && InstanceInventoryItem.Get() == InventoryItem;
 }
 
 void ULabInventoryComponent::RetrieveItemStackingInfo(const ULabInventoryItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const
