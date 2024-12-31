@@ -2,7 +2,7 @@
 
 #include "LabInventory.h"
 
-#define LOCTEXT_NAMESPACE "FLAB_InventoryModule"
+#define LOCTEXT_NAMESPACE "FLabInventoryModule"
 
 void FLabInventoryModule::StartupModule()
 {
@@ -18,6 +18,6 @@ void FLabInventoryModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FLabInventoryModule, LAB_Inventory)
+IMPLEMENT_MODULE(FLabInventoryModule, LabInventory)
 
 DEFINE_LOG_CATEGORY(LogLabInventory);
