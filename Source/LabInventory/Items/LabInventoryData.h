@@ -8,7 +8,7 @@
 
 struct FLabUpdateInventoryParam;
 class ULabInventoryComponent;
-class ULabInventoryItem;
+class ULabItem;
 
 USTRUCT(BlueprintType)
 struct FLabInventoryEntry : public FFastArraySerializerItem
@@ -55,7 +55,7 @@ public:
 private:
 	friend class ULabInventoryComponent;
 	
-	bool AddItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem);
+	bool AddItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabItem>& InventoryItem);
 	
 	bool AddItemCount(const int32 SlotIndex, const int32 ItemCount);
 

@@ -5,7 +5,7 @@
 
 
 class ULabInventoryComponent;
-class ULabInventoryItem;
+class ULabItem;
 
 UENUM()
 enum ELabInventorySlotStatus
@@ -37,7 +37,7 @@ struct FLabUpdateInventoryParam
 	int32 RemainingSlotCapacity = 0;
 
 	UPROPERTY()
-	TSoftObjectPtr<ULabInventoryItem> InventoryItem = nullptr;
+	TSoftObjectPtr<ULabItem> InventoryItem = nullptr;
 
 	UPROPERTY()
 	TEnumAsByte<ELabInventorySlotStatus> Status = InventoryFull;

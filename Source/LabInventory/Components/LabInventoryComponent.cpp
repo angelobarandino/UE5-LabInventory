@@ -4,8 +4,8 @@
 #include "LabInventoryComponent.h"
 
 #include "LabInventory/LabInventory.h"
-#include "LabInventory/Core/LabInventoryItemInstance.h"
-#include "LabInventory/Items/LabInventoryItem.h"
+#include "LabInventory/Items/LabInventoryItemInstance.h"
+#include "LabInventory/Items/LabItem.h"
 #include "LabInventory/Items/LabItemFragment.h"
 #include "LabInventory/Library/LabInventoryStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -29,7 +29,7 @@ bool ULabInventoryComponent::TryGetInventoryItemAtSlot(const int32 SlotIndex, FL
 {
 	if (const FLabInventoryEntry* Item = InventoryList.GetItemAtSlot(SlotIndex))
 	{
-		if (Item->Instance.InventoryItem.IsValid())
+		if (Item->Instance.Item.IsValid())
 		{
 			InventoryItem = Item->Instance;
 			return true;
@@ -39,7 +39,7 @@ bool ULabInventoryComponent::TryGetInventoryItemAtSlot(const int32 SlotIndex, FL
 	return false;
 }
 
-FLabUpdateInventoryParam ULabInventoryComponent::FindInventorySlotForItem(const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem)
+FLabUpdateInventoryParam ULabInventoryComponent::FindInventorySlotForItem(const int32 ItemCount, const TSoftObjectPtr<ULabItem>& InventoryItem)
 {
 	FLabUpdateInventoryParam UpdateParams;
 	UpdateParams.Status = InventoryFull;
@@ -95,7 +95,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::FindInventorySlotForItem(const 
 	return UpdateParams;
 }
 
-FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem)
+FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabItem>& InventoryItem)
 {
 	FLabUpdateInventoryParam UpdateParams;
 	UpdateParams.SlotIndex = SlotIndex;
@@ -148,7 +148,7 @@ FLabUpdateInventoryParam ULabInventoryComponent::CreateMoveToSlotForItem(const i
 	return UpdateParams;
 }
 
-bool ULabInventoryComponent::CanMoveItemToSlot(const int32 SlotIndex, const ULabInventoryItem* InventoryItem)
+bool ULabInventoryComponent::CanMoveItemToSlot(const int32 SlotIndex, const ULabItem* InventoryItem)
 {
 	// Ensure the InventoryItem is valid.
 	if (!InventoryItem)
@@ -248,14 +248,14 @@ TArray<FLabInventoryItemInstance> ULabInventoryComponent::GetInventoryItems() co
 	return InventoryItems;
 }
 
-bool ULabInventoryComponent::IsItemCompatible(const FLabInventoryEntry& ItemEntry, const ULabInventoryItem* InventoryItem) const
+bool ULabInventoryComponent::IsItemCompatible(const FLabInventoryEntry& ItemEntry, const ULabItem* InventoryItem) const
 {
-	const TSoftObjectPtr<ULabInventoryItem> InstanceInventoryItem = ItemEntry.Instance.InventoryItem;
+	const TSoftObjectPtr<ULabItem> InstanceInventoryItem = ItemEntry.Instance.Item;
 	
 	return InstanceInventoryItem.IsValid() && InstanceInventoryItem.Get() == InventoryItem;
 }
 
-void ULabInventoryComponent::RetrieveItemStackingInfo(const ULabInventoryItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const
+void ULabInventoryComponent::RetrieveItemStackingInfo(const ULabItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const
 {
 	// Default to 1 stack size and non-stackable if no fragment is found
 	OutStackSize = 1;

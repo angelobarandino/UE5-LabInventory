@@ -1,8 +1,8 @@
 ﻿#include "LabInventoryData.h"
 
 #include "LabInventoryItemInstance.h"
+#include "LabItem.h"
 #include "LabInventory/Components/LabInventoryComponent.h"
-#include "LabInventory/Items/LabInventoryItem.h"
 
 void FLabInventoryList::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
 {
@@ -35,7 +35,7 @@ FLabInventoryEntry* FLabInventoryList::GetItemAtSlot(const int32 SlotIndex)
 	{
 		FLabInventoryEntry& Item = *ItemIt;
 		
-		if (Item.Instance.SlotIndex == SlotIndex && Item.Instance.InventoryItem.IsValid())
+		if (Item.Instance.SlotIndex == SlotIndex && Item.Instance.Item.IsValid())
 		{
 			return &Item;
 		}
@@ -44,7 +44,7 @@ FLabInventoryEntry* FLabInventoryList::GetItemAtSlot(const int32 SlotIndex)
 	return nullptr;
 }
 
-bool FLabInventoryList::AddItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem)
+bool FLabInventoryList::AddItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabItem>& InventoryItem)
 {
 	check(InventoryItem);
 	check(OwnerInventory);
@@ -56,7 +56,7 @@ bool FLabInventoryList::AddItem(const int32 SlotIndex, const int32 ItemCount, co
 			// ULAB_InventoryItemInstance* ItemInstance = NewObject<ULAB_InventoryItemInstance>(OwningActor);
 			
 			FLabInventoryItemInstance ItemInstance;
-			ItemInstance.InventoryItem = InventoryItem;
+			ItemInstance.Item = InventoryItem;
 			ItemInstance.ItemCount = ItemCount;
 			ItemInstance.SlotIndex = SlotIndex;
 			
@@ -82,7 +82,7 @@ bool FLabInventoryList::AddItemCount(const int32 SlotIndex, const int32 ItemCoun
 		{
 			if (FLabInventoryEntry* Item = GetItemAtSlot(SlotIndex))
 			{
-				if (Item->Instance.InventoryItem.IsValid())
+				if (Item->Instance.Item.IsValid())
 				{
 					Item->Instance.ItemCount += ItemCount;
 					MarkItemDirty(*Item);

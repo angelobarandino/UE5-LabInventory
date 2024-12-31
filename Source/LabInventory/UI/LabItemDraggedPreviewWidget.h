@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "LabItemDraggedPreviewWidget.generated.h"
 
-class ULabInventoryItem;
+class ULabItem;
 class ULabInventorySlotEntry;
 /**
  * 
@@ -22,6 +22,6 @@ public:
 protected:
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetItemDetails(const ULabInventoryItem* Item, const int32 ItemCount);
+	void SetItemDetails(const ULabItem* Item, const int32 ItemCount);
 
 };

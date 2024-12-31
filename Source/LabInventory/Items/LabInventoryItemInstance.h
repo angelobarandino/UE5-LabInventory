@@ -5,7 +5,7 @@
 
 struct FLabInventoryList;
 class ULabInventoryComponent;
-class ULabInventoryItem;
+class ULabItem;
 
 USTRUCT(BlueprintType)
 struct FLabInventoryItemInstance
@@ -15,7 +15,7 @@ struct FLabInventoryItemInstance
 public:
 	
 	UPROPERTY(BlueprintReadOnly)
-	TSoftObjectPtr<ULabInventoryItem> InventoryItem = nullptr;
+	TSoftObjectPtr<ULabItem> Item = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemCount = 0;

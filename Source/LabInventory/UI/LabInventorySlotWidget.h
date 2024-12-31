@@ -11,7 +11,7 @@
 class ILabInventoryManagerInterface;
 class ULabInventoryItemTooltip;
 class ULabItemDraggedPreviewWidget;
-class ULabInventoryItem;
+class ULabItem;
 class ULabInventorySlotEntry;
 
 UCLASS()
@@ -44,7 +44,7 @@ protected:
 	TWeakObjectPtr<ULabInventorySlotEntry> SlotItemData;
 
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<const ULabInventoryItem> InventoryItem = nullptr;
+	TObjectPtr<const ULabItem> InventoryItem = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemCount = 0;

@@ -9,7 +9,7 @@
 struct FLabMoveInventoryItemParam;
 class ULabInventoryComponent;
 class ULabItemFragment;
-class ULabInventoryItem;
+class ULabItem;
 
 UENUM(BlueprintType)
 enum class EInventoryUpdateResult : uint8
@@ -42,7 +42,7 @@ class LABINVENTORY_API ULabInventoryStatics : public UBlueprintFunctionLibrary
 public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "LAB Inventory Statics")
-	static FLabInventoryTransactionResult TryAddItemToInventory(AActor* TargetActor, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& ItemDefinition);
+	static FLabInventoryTransactionResult TryAddItemToInventory(AActor* TargetActor, const int32 ItemCount, const TSoftObjectPtr<ULabItem>& ItemDefinition);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "LAB Inventory Statics")
 	static void MoveInventoryItem(const FLabMoveInventoryItemParam& MoveItemParam);
@@ -51,7 +51,7 @@ public:
 	static void TransferAllInventoryItems(ULabInventoryComponent* SourceInventory, ULabInventoryComponent* TargetInventory);
 	
 	UFUNCTION(BlueprintCallable, Category = "LAB Inventory Statics", meta=(DeterminesOutputType=FragmentClass))
-	static const ULabItemFragment* FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem, TSubclassOf<ULabItemFragment> FragmentClass);
+	static const ULabItemFragment* FindItemDefinitionFragment(const ULabItem* InventoryItem, TSubclassOf<ULabItemFragment> FragmentClass);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LAB Inventory Statics")
 	static ULabInventoryComponent* GetInventoryComponent(AActor* Actor);
@@ -60,7 +60,7 @@ public:
 	static const ULabInventoryComponent* GetInventoryComponentConst(AActor* Actor);
 
 	template<typename TFragmentClass>
-	static const TFragmentClass* FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem)
+	static const TFragmentClass* FindItemDefinitionFragment(const ULabItem* InventoryItem)
 	{
 		return Cast<TFragmentClass>(FindItemDefinitionFragment(InventoryItem, TFragmentClass::StaticClass()));
 	}

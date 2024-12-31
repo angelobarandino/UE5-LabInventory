@@ -8,7 +8,8 @@
 #include "Engine/AssetManager.h"
 #include "LabInventory/LabInventory.h"
 #include "LabInventory/Components/LabInventoryComponent.h"
-#include "LabInventory/Items/LabInventoryItem.h"
+#include "LabInventory/Items/LabInventoryItemInstance.h"
+#include "LabInventory/Items/LabItem.h"
 #include "LabInventory/Library/LabInventoryStatics.h"
 
 
@@ -63,12 +64,12 @@ void ULabInventoryGridWidget::CreateInventorySlots()
 			Entry->ItemCount = ItemInstance.ItemCount;
 
 			UAssetManager::GetStreamableManager().RequestAsyncLoad(
-				ItemInstance.InventoryItem.ToSoftObjectPath(),
+				ItemInstance.Item.ToSoftObjectPath(),
 				[this, Entry, ItemInstance]()
 				{
-					if (ItemInstance.InventoryItem.IsValid())
+					if (ItemInstance.Item.IsValid())
 					{
-						Entry->InventoryItem = ItemInstance.InventoryItem.Get();
+						Entry->InventoryItem = ItemInstance.Item.Get();
 					}
 					else
 					{
@@ -86,13 +87,13 @@ void ULabInventoryGridWidget::CreateInventorySlots()
 
 void ULabInventoryGridWidget::HandleInventoryItemUpdated(const FLabInventoryItemInstance& Instance)
 {
-	if (Instance.InventoryItem.IsValid())
+	if (Instance.Item.IsValid())
 	{
 		UObject* SlotEntry = InventorySlots->GetItemAt(Instance.SlotIndex);
 		if (ULabInventorySlotEntry* ItemEntry = Cast<ULabInventorySlotEntry>(SlotEntry))
 		{
 			ItemEntry->ItemCount = Instance.ItemCount;
-			ItemEntry->InventoryItem = Instance.InventoryItem.Get();
+			ItemEntry->InventoryItem = Instance.Item.Get();
 			ItemEntry->UpdateInventorySlotDisplay.Broadcast();
 		}
 	}

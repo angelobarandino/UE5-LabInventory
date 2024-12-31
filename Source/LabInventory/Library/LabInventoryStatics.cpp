@@ -5,11 +5,12 @@
 
 #include "LabInventory/LabInventory.h"
 #include "LabInventory/Components/LabInventoryComponent.h"
-#include "LabInventory/Core/LabUpdateInventoryParam.h"
-#include "LabInventory/Items/LabInventoryItem.h"
+#include "LabInventory/Items/LabInventoryItemInstance.h"
+#include "LabInventory/Items/LabItem.h"
 #include "LabInventory/Items/LabItemFragment.h"
+#include "LabInventory/Items/LabUpdateInventoryParam.h"
 
-FLabInventoryTransactionResult ULabInventoryStatics::TryAddItemToInventory(AActor* TargetActor, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& ItemDefinition)
+FLabInventoryTransactionResult ULabInventoryStatics::TryAddItemToInventory(AActor* TargetActor, const int32 ItemCount, const TSoftObjectPtr<ULabItem>& ItemDefinition)
 {
 	check(TargetActor);
 
@@ -85,10 +86,10 @@ void ULabInventoryStatics::MoveInventoryItem(const FLabMoveInventoryItemParam& M
 		if (SourceInventory->TryGetInventoryItemAtSlot(SourceSlotIndex, ItemInstance))
 		{
 			// check if TSoftObjectPtr<ULabInventoryItem> is valid or loaded
-			if (ItemInstance.InventoryItem.IsValid())
+			if (ItemInstance.Item.IsValid())
 			{
 				const FLabUpdateInventoryParam Param = TargetInventory->CreateMoveToSlotForItem(
-					TargetSlotIndex, ItemInstance.ItemCount, ItemInstance.InventoryItem);
+					TargetSlotIndex, ItemInstance.ItemCount, ItemInstance.Item);
 
 				if (Param.Status == UnavailableItemSlot || Param.Status == InventoryItemInvalid)
 				{
@@ -133,12 +134,12 @@ void ULabInventoryStatics::TransferAllInventoryItems(ULabInventoryComponent* Sou
 		FLabUpdateInventoryParam UpdateParam;
 		
 		const FLabInventoryItemInstance& ItemInstance = Items[Index];
-		if (ItemInstance.InventoryItem.IsValid())
+		if (ItemInstance.Item.IsValid())
 		{
 			int32 RemainingItemCount = ItemInstance.ItemCount;
 			while (RemainingItemCount > 0)
 			{
-				UpdateParam = TargetInventory->FindInventorySlotForItem(RemainingItemCount, ItemInstance.InventoryItem);
+				UpdateParam = TargetInventory->FindInventorySlotForItem(RemainingItemCount, ItemInstance.Item);
 				if (!UpdateParam.CanAddItems())
 					break;
 				
@@ -160,7 +161,7 @@ void ULabInventoryStatics::TransferAllInventoryItems(ULabInventoryComponent* Sou
 	}
 }
 
-const ULabItemFragment* ULabInventoryStatics::FindItemDefinitionFragment(const ULabInventoryItem* InventoryItem, const TSubclassOf<ULabItemFragment> FragmentClass)
+const ULabItemFragment* ULabInventoryStatics::FindItemDefinitionFragment(const ULabItem* InventoryItem, const TSubclassOf<ULabItemFragment> FragmentClass)
 {
 	if (InventoryItem && FragmentClass)
 	{

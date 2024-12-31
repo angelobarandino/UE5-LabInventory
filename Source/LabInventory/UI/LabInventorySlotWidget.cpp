@@ -10,10 +10,10 @@
 #include "LabInventory/LabInventory.h"
 #include "LabInventory/Components/LabInventoryComponent.h"
 #include "LabInventory/Components/LabPlayerInventoryManager.h"
-#include "LabInventory/Core/LabUpdateInventoryParam.h"
 #include "LabInventory/Interfaces/LabInventoryManagerInterface.h"
 #include "LabInventory/Interfaces/LabPlayerInventoryInterface.h"
 #include "LabInventory/Items/LabItemFragment.h"
+#include "LabInventory/Items/LabUpdateInventoryParam.h"
 #include "LabInventory/Library/LabInventoryStatics.h"
 
 

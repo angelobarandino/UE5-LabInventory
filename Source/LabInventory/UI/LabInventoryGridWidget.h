@@ -8,7 +8,7 @@
 
 struct FLabInventoryItemInstance;
 class UTileView;
-class ULabInventoryItem;
+class ULabItem;
 class ULabInventoryComponent;
 
 DECLARE_MULTICAST_DELEGATE(FLoadInventorySlotItem);
@@ -23,7 +23,7 @@ public:
 	int32 SlotIndex = INDEX_NONE;
 	
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<const ULabInventoryItem> InventoryItem = nullptr;
+	TObjectPtr<const ULabItem> InventoryItem = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 ItemCount = 0;

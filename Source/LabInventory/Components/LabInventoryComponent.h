@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "LabInventory/Core/LabInventoryData.h"
-#include "LabInventory/Core/LabUpdateInventoryParam.h"
+#include "LabInventory/Items/LabInventoryData.h"
+#include "LabInventory/Items/LabUpdateInventoryParam.h"
 #include "LabInventoryComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemUpdatedDelegate, const FLabInventoryItemInstance&, Instance);
@@ -36,13 +36,13 @@ public:
 	bool TryGetInventoryItemAtSlot(const int32 SlotIndex, FLabInventoryItemInstance& InventoryItem);
 
 	UFUNCTION()
-	FLabUpdateInventoryParam FindInventorySlotForItem(const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem);
+	FLabUpdateInventoryParam FindInventorySlotForItem(const int32 ItemCount, const TSoftObjectPtr<ULabItem>& InventoryItem);
 
 	UFUNCTION()
-	FLabUpdateInventoryParam CreateMoveToSlotForItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabInventoryItem>& InventoryItem);
+	FLabUpdateInventoryParam CreateMoveToSlotForItem(const int32 SlotIndex, const int32 ItemCount, const TSoftObjectPtr<ULabItem>& InventoryItem);
 
 	UFUNCTION()
-	bool CanMoveItemToSlot(const int32 SlotIndex, const ULabInventoryItem* InventoryItem);
+	bool CanMoveItemToSlot(const int32 SlotIndex, const ULabItem* InventoryItem);
 	
 	UFUNCTION()
 	bool AddInventoryItem(const FLabUpdateInventoryParam& Params);
@@ -59,10 +59,10 @@ private:
 	FLabInventoryList InventoryList;
 
 	UFUNCTION()
-	bool IsItemCompatible(const FLabInventoryEntry& ItemEntry, const ULabInventoryItem* InventoryItem) const;
+	bool IsItemCompatible(const FLabInventoryEntry& ItemEntry, const ULabItem* InventoryItem) const;
 
 	UFUNCTION()
-	void RetrieveItemStackingInfo(const ULabInventoryItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const;
+	void RetrieveItemStackingInfo(const ULabItem* InventoryItem, bool& bOutStackable, int32& OutStackSize) const;
 	
 	UFUNCTION()
 	int32 CalculateMaxItemsToAdd(int32 MaxStackPerSlot, int32 CurrentItemCountInSlot, int32 RequestedItemCount) const;

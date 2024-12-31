@@ -3,7 +3,6 @@
 
 #include "LabItemDraggedPreviewWidget.h"
 #include "LabInventoryGridWidget.h"
-#include "LabInventory/Items/LabInventoryItem.h"
 
 void ULabItemDraggedPreviewWidget::InitializePreview(const ULabInventorySlotEntry* SlotEntry)
 {
