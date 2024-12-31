@@ -4,7 +4,7 @@
 #include "LabInventoryItemInstance.h"
 #include "Net/Serialization/FastArraySerializer.h"
 
-#include "LabInventoryData.generated.h"
+#include "LabInventoryList.generated.h"
 
 struct FLabUpdateInventoryParam;
 class ULabInventoryComponent;
@@ -32,13 +32,9 @@ struct FLabInventoryList : public FFastArraySerializer
 	GENERATED_BODY()
 
 public:
-	FLabInventoryList()
-		: OwnerInventory(nullptr)
-	{}
-	
+	FLabInventoryList() : OwnerInventory(nullptr) {}
 	FLabInventoryList(ULabInventoryComponent* InInventoryComponent)
-		: OwnerInventory(InInventoryComponent)
-	{}
+		: OwnerInventory(InInventoryComponent) {}
 	
 	// ~Start FFastArraySerializer
 	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);

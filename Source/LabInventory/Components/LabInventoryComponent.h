@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "LabInventory/Items/LabInventoryData.h"
+#include "LabInventory/Items/LabInventoryList.h"
 #include "LabInventory/Items/LabUpdateInventoryParam.h"
 #include "LabInventoryComponent.generated.h"
 

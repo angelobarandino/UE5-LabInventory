@@ -1,4 +1,4 @@
-﻿#include "LabInventoryData.h"
+﻿#include "LabInventoryList.h"
 
 #include "LabInventoryItemInstance.h"
 #include "LabItem.h"
