@@ -6,6 +6,8 @@
 #include "Engine/DataAsset.h"
 #include "LabEquipmentSlotSet.generated.h"
 
+class ULabEquipmentComponent;
+
 USTRUCT()
 struct FLabEquipmentSlotSet_SlotInfo
 {
@@ -32,4 +34,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FName, FLabEquipmentSlotSet_SlotInfo> EquipmentSlots;
 
+	UFUNCTION(BlueprintCallable)
+	void GiveEquipmentSlots(ULabEquipmentComponent* EquipmentComponent);
 };

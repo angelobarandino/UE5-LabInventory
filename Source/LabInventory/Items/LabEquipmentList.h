@@ -6,6 +6,7 @@
 #include "LabEquipmentList.generated.h"
 
 
+class ULabEquipmentItem;
 class ULabEquipmentComponent;
 
 USTRUCT(BlueprintType)
@@ -13,13 +14,14 @@ struct FLabEquipmentSlot : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
-private:
-	
-	UPROPERTY()
-	FName SlotID = NAME_None;
+	FLabEquipmentSlot() : SlotID(NAME_None), Item(nullptr) {}
+	FLabEquipmentSlot(const FName InSlotID) : SlotID(InSlotID) {}
 
 	UPROPERTY()
-	FLabEquipmentItemInstance Instance;
+	FName SlotID;
+
+	UPROPERTY()
+	TSoftObjectPtr<ULabEquipmentItem> Item;
 	
 };
 
@@ -37,7 +39,11 @@ public:
 	{
 		return FFastArraySerializer::FastArrayDeltaSerialize<FLabEquipmentSlot, FLabEquipmentList>( Items, DeltaParms, *this );
 	}
-	
+
+	bool AddSlot(const FName SlotID);
+
+	void SetSlotEquipmentItem(const FName SlotID, const TSoftObjectPtr<ULabEquipmentItem>& EquipmentItem);
+
 private:
 	friend ULabEquipmentComponent;
 	

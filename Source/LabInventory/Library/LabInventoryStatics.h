@@ -26,7 +26,7 @@ USTRUCT(BlueprintType)
 struct FLabInventoryTransactionResult
 {
 	GENERATED_BODY()
-
+ 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EInventoryUpdateResult ChangeResult = EInventoryUpdateResult::Failure;
 
